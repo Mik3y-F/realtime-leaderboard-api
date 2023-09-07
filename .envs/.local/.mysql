@@ -1,0 +1,8 @@
+# MySQL
+# ------------------------------------------------------------------------------
+MYSQL_HOST=leaderboard_local_mysql
+MYSQL_PORT=3306
+MYSQL_DATABASE=leaderboard-app
+MYSQL_USER=dev-user
+MYSQL_ROOT_PASSWORD=W5URefgkcsaOg9M4gI2FOAVWPPtWUEZlIpjWZTcsrHgxlnAg9BNcfNaeEwsIHnOc
+MYSQL_PASSWORD=random-dev-password

@@ -1,0 +1,52 @@
+version: "3.8"
+
+volumes:
+  leaderboard_local_mysql_data: {}
+  leaderboard_local_mysql_data_backups: {}
+
+services:
+  # Go Application Service
+  leaderboard-app:
+    container_name: leaderboard_app_local
+    build:
+      context: .
+      dockerfile: ./compose/local/leaderboard-app/Dockerfile
+    ports:
+      - "8080:8080"
+      - "6060:6060"
+    depends_on:
+      - leaderboard-db
+      - leaderboard-cache
+      - leaderboard-queue
+    env_file:
+      - ./.envs/.local/.leaderboard-app
+      - ./.envs/.local/.mysql
+
+  # MySQL Service
+  leaderboard-db:
+    image: mysql:8.0
+    container_name: leaderboard_local_mysql
+    ports:
+      - "3306:3306"
+      - "33060:33060"
+    volumes:
+      - leaderboard_local_mysql_data:/var/lib/mysql
+      - leaderboard_local_mysql_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.mysql
+
+  # Redis Service
+  leaderboard-cache:
+    image: redis:7.0
+    container_name: leaderboard_local_redis
+    ports:
+      - "6379:6379"
+
+  # RabbitMQ Service
+  leaderboard-queue:
+    image: "rabbitmq"
+    container_name: leaderboard_local_rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
