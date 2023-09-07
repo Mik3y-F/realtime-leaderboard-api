@@ -10,8 +10,12 @@ import (
 func (s *HttpServer) registerPlayerRoutes() {
 	s.router.POST("/players", s.handleCreatePlayer)
 	s.router.GET("/players", s.handleListPlayers)
+
 	s.router.GET("/players/:id", s.handleGetPlayerByID)
 	s.router.DELETE("/players/:id", s.handleDeletePlayer)
+
+	s.router.GET("/players/:id/score", s.handleGetPlayerScore)
+
 	s.router.PUT("/players/:id", s.handleUpdatePlayerDetails)
 
 }
@@ -83,4 +87,16 @@ func (s *HttpServer) handleUpdatePlayerDetails(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, player)
+}
+
+func (s *HttpServer) handleGetPlayerScore(c *gin.Context) {
+	playerID := c.Param("id")
+
+	score, err := s.PlayerRepository.GetPlayerTotalScore(c.Request.Context(), playerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, score)
 }

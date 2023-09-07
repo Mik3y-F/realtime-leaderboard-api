@@ -35,6 +35,7 @@ type HttpServer struct {
 
 	// Repository implementations.
 	PlayerRepository repository.PlayerRepository
+	ScoreRepository  repository.ScoreRepository
 }
 
 // NewHttpServer creates a new instance of HttpServer.

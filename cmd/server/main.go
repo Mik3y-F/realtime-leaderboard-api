@@ -63,6 +63,7 @@ type Main struct {
 
 	// Repository implementations.
 	PlayerRepository repository.PlayerRepository
+	ScoreRepository  repository.ScoreRepository
 }
 
 func NewMain() *Main {
@@ -99,12 +100,15 @@ func (m *Main) Run(ctx context.Context) (err error) {
 
 	// Create repository implementations.
 	playerService := mysql.NewPlayerRepository(m.DB)
+	scoreService := mysql.NewScoreRepository(m.DB)
 
 	// Attach to Main for use in tests.
 	m.PlayerRepository = playerService
+	m.ScoreRepository = scoreService
 
 	// Copy repository implementations to the HTTP server.
 	m.HTTPServer.PlayerRepository = playerService
+	m.HTTPServer.ScoreRepository = scoreService
 
 	// should probably be in a config file
 	httpAddress := pkg.GetEnv(HTTPAddress)

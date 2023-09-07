@@ -8,15 +8,31 @@ package generated
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 const createPlayer = `-- name: CreatePlayer :execresult
-INSERT INTO players (name)
-VALUES (?)
+INSERT INTO players (name, created_at, updated_at)
+VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 `
 
 func (q *Queries) CreatePlayer(ctx context.Context, name string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, createPlayer, name)
+}
+
+const createScoreEntry = `-- name: CreateScoreEntry :execresult
+INSERT INTO score_entries (player_id, score, entry_time)
+VALUES (?, ?, ?)
+`
+
+type CreateScoreEntryParams struct {
+	PlayerID  string
+	Score     int32
+	EntryTime time.Time
+}
+
+func (q *Queries) CreateScoreEntry(ctx context.Context, arg CreateScoreEntryParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createScoreEntry, arg.PlayerID, arg.Score, arg.EntryTime)
 }
 
 const deletePlayer = `-- name: DeletePlayer :execresult
@@ -45,6 +61,94 @@ func (q *Queries) GetPlayerByID(ctx context.Context, id string) (Player, error) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getPlayerScoreEntries = `-- name: GetPlayerScoreEntries :many
+SELECT entry_id, player_id, score, entry_time
+FROM score_entries
+WHERE player_id = ?
+`
+
+func (q *Queries) GetPlayerScoreEntries(ctx context.Context, playerID string) ([]ScoreEntry, error) {
+	rows, err := q.db.QueryContext(ctx, getPlayerScoreEntries, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ScoreEntry
+	for rows.Next() {
+		var i ScoreEntry
+		if err := rows.Scan(
+			&i.EntryID,
+			&i.PlayerID,
+			&i.Score,
+			&i.EntryTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPlayerTotalScore = `-- name: GetPlayerTotalScore :one
+SELECT SUM(score) AS total_score
+FROM score_entries
+WHERE player_id = ?
+`
+
+func (q *Queries) GetPlayerTotalScore(ctx context.Context, playerID string) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getPlayerTotalScore, playerID)
+	var total_score interface{}
+	err := row.Scan(&total_score)
+	return total_score, err
+}
+
+const getTopNPlayers = `-- name: GetTopNPlayers :many
+SELECT p.id AS player_id,
+    p.name,
+    SUM(se.score) AS total_score
+FROM score_entries se
+    JOIN players p ON se.player_id = p.id
+GROUP BY se.player_id,
+    p.name
+ORDER BY total_score DESC
+LIMIT ?
+`
+
+type GetTopNPlayersRow struct {
+	PlayerID   string
+	Name       string
+	TotalScore interface{}
+}
+
+func (q *Queries) GetTopNPlayers(ctx context.Context, limit int32) ([]GetTopNPlayersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTopNPlayers, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTopNPlayersRow
+	for rows.Next() {
+		var i GetTopNPlayersRow
+		if err := rows.Scan(&i.PlayerID, &i.Name, &i.TotalScore); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listPlayers = `-- name: ListPlayers :many

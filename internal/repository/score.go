@@ -1,18 +1,17 @@
 package repository
 
+import "context"
+
 type Score struct {
-	PlayerID  string
-	Score     int
-	TimeStamp int64
+	PlayerID  string `json:"player_id"`
+	Score     int32  `json:"score"`
+	TimeStamp int64  `json:"timestamp,omitempty"`
 }
 
 type ScoreRepository interface {
 	// GetTopNPlayers retrieves the top 'N' players from the Redis leaderboard.
-	GetTopNPlayers(n int) ([]*Score, error)
-
-	// GetPlayerScore retrieves the score of a given player.
-	GetPlayerScore(playerID string) (*Score, error)
+	GetTopNPlayers(ctx context.Context, n int32) ([]*Score, error)
 
 	// CreateScore creates a new score for a given player.
-	CreateScore(playerID string, score int) error
+	CreateScore(ctx context.Context, playerID string, score int32) error
 }

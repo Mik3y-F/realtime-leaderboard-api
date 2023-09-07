@@ -115,3 +115,23 @@ func (r *PlayerRepository) DeletePlayer(ctx context.Context, playerID string) er
 
 	return nil
 }
+
+// GetPlayerScore retrieves the score of a given player.
+func (r *PlayerRepository) GetPlayerTotalScore(ctx context.Context, playerID string) (*repository.Score, error) {
+	totalScoreResult, err := r.queries.GetPlayerTotalScore(ctx, playerID)
+	if err != nil {
+		return nil, pkg.Errorf(pkg.INTERNAL_ERROR, "cannot get player score: %v", err)
+	}
+
+	t := totalScoreResult
+	totalScore, ok := t.(int32)
+	if !ok {
+		return nil, pkg.Errorf(pkg.INTERNAL_ERROR, "cannot convert score to int64")
+	}
+
+	return &repository.Score{
+		PlayerID: playerID,
+		Score:    totalScore,
+	}, nil
+
+}

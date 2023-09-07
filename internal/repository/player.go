@@ -38,4 +38,7 @@ type PlayerRepository interface {
 
 	// UpdatePlayerDetails updates the details of a player.
 	UpdatePlayerDetails(ctx context.Context, playerID string, player PlayerUpdate) (*Player, error)
+
+	// GetPlayerScore retrieves the score of a given player.
+	GetPlayerTotalScore(ctx context.Context, playerID string) (*Score, error)
 }

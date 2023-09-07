@@ -24,3 +24,11 @@ docker compose -f local.yml up
 ```
 
 the above command will have ther server running on port 8080.
+
+## Generating Queries
+
+The API uses SQLC for generating go from sql queries. To generate queries, run the following command:
+
+```bash
+sqlc generate -f configs/db/sqlc.yaml
+```
