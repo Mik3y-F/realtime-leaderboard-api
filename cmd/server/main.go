@@ -9,6 +9,7 @@ import (
 
 	"github.com/Mik3y-F/realtime-leaderboard-api/internal/http"
 	"github.com/Mik3y-F/realtime-leaderboard-api/internal/mysql"
+	"github.com/Mik3y-F/realtime-leaderboard-api/internal/repository"
 	"github.com/Mik3y-F/realtime-leaderboard-api/pkg"
 )
 
@@ -59,6 +60,9 @@ type Main struct {
 
 	// HTTP server for handling HTTP communication.
 	HTTPServer *http.HttpServer
+
+	// Repository implementations.
+	PlayerRepository repository.PlayerRepository
 }
 
 func NewMain() *Main {
@@ -92,6 +96,15 @@ func (m *Main) Run(ctx context.Context) (err error) {
 	if err := m.DB.Open(); err != nil {
 		return fmt.Errorf("cannot open db: %w", err)
 	}
+
+	// Create repository implementations.
+	playerService := mysql.NewPlayerRepository(m.DB)
+
+	// Attach to Main for use in tests.
+	m.PlayerRepository = playerService
+
+	// Copy repository implementations to the HTTP server.
+	m.HTTPServer.PlayerRepository = playerService
 
 	// should probably be in a config file
 	httpAddress := pkg.GetEnv(HTTPAddress)

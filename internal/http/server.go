@@ -52,13 +52,14 @@ func NewHttpServer() *HttpServer {
 		},
 	}
 
-	s.registerCallbackRoutes()
+	s.registerHealthCheckRooutes()
+	s.registerPlayerRoutes()
 
 	return s
 }
 
-// registerCallbackRoutes registers the callback routes.
-func (s *HttpServer) registerCallbackRoutes() {
+// registerHealthCheckRooutes registers the callback routes.
+func (s *HttpServer) registerHealthCheckRooutes() {
 	s.router.GET("/health", s.healthCheck)
 }
 
