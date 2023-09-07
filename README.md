@@ -11,9 +11,15 @@ This is a realtime leaderboard API built using go.
 
 The API exposes the following endpoints:
 
-* `/leaderboard`: Retrieves the leaderboard with scores and rankings.
-* `/scores`: Retrieves the scores of all players.
-* `/player/{id}`: Retrieves the score and ranking of a specific player.
+* `POST /scores`: Creates a new player score entry.
+* `GET /scores/top/{n}`: Retrieves the top n players.
+
+* `POST /players`: Creates a new player.
+* `GET /players`: Retrieves a list of all players.
+* `GET /players/{id}`: Retrieves a specific player by ID.
+* `DELETE /players/{id}`: Deletes a specific player by ID.
+* `GET /players/{id}/score`: Retrieves the Total score of a specific player.
+* `PUT /players/{id}`: Updates the details of a specific player.
 
 ## Getting Started
 
